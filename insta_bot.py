@@ -101,7 +101,7 @@ class InstaBot:
 
         return followers, following
     
-    def not_follow_back(self, followers: list[str], following: list[str]):
+    def get_not_follow_back(self, followers: list[str], following: list[str]):
         not_follow_back = []
         for f in following:
             if f not in followers: # if the following is not on followers
