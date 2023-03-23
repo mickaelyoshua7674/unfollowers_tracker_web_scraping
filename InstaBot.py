@@ -6,9 +6,10 @@ import re
 import boto3
 import ast
 import json
+import requests
 
 class InstaBot:
-    def __init__(self, name_aws_secret_insta: str, aws_region: str, chrome_driver_path: str) -> None:
+    def __init__(self, name_aws_secret_insta: str, name_aws_secret_telegram: str, aws_region: str, chrome_driver_path: str) -> None:
         # GET INSTA USERNAME AND PASSWORD FROM AWS SECRETS MANAGER
         self.CHROME_DRIVER_PATH = chrome_driver_path
         print("Getting username and login...")
@@ -22,6 +23,17 @@ class InstaBot:
         self.INSTA_USERNAME = ast.literal_eval(secret_response_insta["SecretString"])["username"]
         self.INSTA_PASSWORD = ast.literal_eval(secret_response_insta["SecretString"])["password"]
                                 # ast.literal_eval() turns a string to a dict
+        
+        # GET TELEGRAM API TOKEN AND CHAT ID
+        secret_response_telegram = secrets_manager.get_secret_value(
+                                SecretId = name_aws_secret_telegram
+                                )
+        self.TELEGRAM_API_TOKEN = ast.literal_eval(secret_response_telegram["SecretString"])["telegram_api_token"]
+        # to create your telegram bot https://sendpulse.com/knowledge-base/chatbot/telegram/create-telegram-chatbot
+        self.TELEGRAM_CHAT_ID = ast.literal_eval(secret_response_telegram["SecretString"])["telegram_chat_id"]
+        # send a message to your bot and get chat id https://api.telegram.org/bot<YourBOTToken>/getUpdates
+        self.TELEGRAM_API_URL_MESSAGE = f"https://api.telegram.org/bot{self.TELEGRAM_API_TOKEN}/sendMessage"
+
         self.S3_BUCKET = "insta-followees-followers"
 
         # INITIALIZING CHROME DRIVER
@@ -42,7 +54,7 @@ class InstaBot:
         self.css_selector_followers = ".x9f619.xjbqb8w.x1rg5ohu.x168nmei.x13lgxp2.x5pf9jr.xo71vjh.x1n2onr6" + \
                                     ".x1plvlek.xryxfnj.x1c4vz4f.x2lah0s.x1q0g3np.xqjyukv.x6s0dn4.x1oa3qoh.x1nhvcw1"
         self.css_selector_following = ".x9f619.xjbqb8w.x1rg5ohu.x168nmei.x13lgxp2.x5pf9jr.xo71vjh.x1n2onr6" + \
-                                    ".x1plvlek.xryxfnj.x1c4vz4f.x2lah0s.x1q0g3np.xqjyukv.x6s0dn4.x1oa3qoh.x1nhvcw1"
+                                    ".x1plvlek.xryxfnj.x1c4vz4f.x2lah0s.x1q0g3np.xqjyukv.x6s0dn4.x1oa3qoh.x1nhvcw1"      
 
     def get_num_followers_following(self) -> int:
         """Return the number of followers and following"""
@@ -153,3 +165,7 @@ class InstaBot:
         dict_data = json.loads(data.decode('utf-8')) # decoding
 
         return dict_data["followers"], dict_data["following"]
+    
+    def send_telegram_message(self, message: str) -> None:
+        """Send the input text to the telegram chat id"""
+        requests.post(self.TELEGRAM_API_URL_MESSAGE, json={"chat_id": self.TELEGRAM_CHAT_ID, "text": message})
