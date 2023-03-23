@@ -5,6 +5,7 @@ import time
 import re
 import boto3
 import ast
+import json
 
 class InstaBot:
     def __init__(self, name_aws_secret_insta: str, aws_region: str, chrome_driver_path: str) -> None:
@@ -21,6 +22,7 @@ class InstaBot:
         self.INSTA_USERNAME = ast.literal_eval(secret_response_insta["SecretString"])["username"]
         self.INSTA_PASSWORD = ast.literal_eval(secret_response_insta["SecretString"])["password"]
                                 # ast.literal_eval() turns a string to a dict
+        self.S3_BUCKET = "insta-followees-followers"
 
         # INITIALIZING CHROME DRIVER
         op = webdriver.ChromeOptions()
@@ -86,7 +88,7 @@ class InstaBot:
         for f in follower_obj:
             followers.append(f.text) # get username of all followers
         for i in range(len(followers)):
-            followers[i] = re.sub("\nVerified", "", followers[i]) # remove text of verified accounts
+            followers[i] = re.sub("\n.*", "", followers[i]) # remove text of verified accounts
 
         # WEB SCRAPING FOLLOWING
         print("Getting following list...")
@@ -108,7 +110,7 @@ class InstaBot:
         for f in following_obj:
             following.append(f.text) # get username of all following
         for i in range(len(following)):
-            following[i] = re.sub("\nVerified", "", following[i]) # remove text of verified accounts
+            following[i] = re.sub("\n.*", "", following[i]) # remove text of verified accounts
         driver.quit()
 
         return followers, following
@@ -119,3 +121,35 @@ class InstaBot:
             if f not in followers: # if the following is not on followers
                 not_follow_back.append(f)
         return not_follow_back
+    
+    def save_current_followers_following(self, s3_client: boto3.client, followers: list[str], following: list[str]) -> dict:
+        """
+        Receive the followers and following, put the object 
+        in Amazon S3 bucket and return the response for create a S3 object
+        """
+        data = { # making dict format to store
+            "username": self.INSTA_USERNAME,
+            "followers": followers,
+            "following": following
+        }
+
+        response = s3_client.put_object(
+            Bucket = self.S3_BUCKET, # name of the bucket target
+            Key = f"{self.INSTA_USERNAME}.json", # file name to be storage
+            Body = json.dumps(data) # json.dumps to make a json format
+        )
+        return response
+    
+    def get_saved_followers_following(self, s3_resource: boto3.resource) -> list[str]:
+        """
+        Receive the boto3.resource object and get the data from
+        the S3 Object.
+        """
+        data = s3_resource.Object(
+            bucket_name = self.S3_BUCKET,
+            key = self.INSTA_USERNAME + ".json"
+        ).get()["Body"].read() # return a byte string
+        
+        dict_data = json.loads(data.decode('utf-8')) # decoding
+
+        return dict_data["followers"], dict_data["following"]
