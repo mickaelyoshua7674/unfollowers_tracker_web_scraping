@@ -75,7 +75,7 @@ class InstaBot:
 
         while True:
             new_follower_obj = driver.find_elements(By.CSS_SELECTOR, self.css_selector_followers) # get new list of followers
-            if len(new_follower_obj) >= self.num_followers-1: # when all followers are loaded on page exit the loop
+            if len(new_follower_obj) >= self.num_followers-2: # when all followers are loaded on page exit the loop
                 break
             else:
                 driver.execute_script("arguments[0].scrollIntoView(true);", new_follower_obj[-1]) # scroll down to last follower showing on list
@@ -97,7 +97,7 @@ class InstaBot:
 
         while True:
             new_following_obj = driver.find_elements(By.CSS_SELECTOR, self.css_selector_following) # get new list of followers
-            if len(new_following_obj) >= self.num_following-1: # when all following are loaded on page exit the loop
+            if len(new_following_obj) >= self.num_following-2: # when all following are loaded on page exit the loop
                 break
             else:
                 driver.execute_script("arguments[0].scrollIntoView(true);", new_following_obj[-1]) # scroll down to last following showing on list

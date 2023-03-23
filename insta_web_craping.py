@@ -7,7 +7,7 @@ CHROME_DRIVER_PATH = "chromedriver.exe"
 insta_bot = InstaBot(SECRET_INSTA, AWS_REGION, CHROME_DRIVER_PATH)
 
 followers, following = insta_bot.get_followers_following()
-print(len(followers, following))
+print(len(followers), len(following))
 
 not_follow_back = insta_bot.get_not_follow_back(followers, following)
 print(len(not_follow_back))
