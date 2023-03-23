@@ -9,6 +9,7 @@ import ast
 class InstaBot:
     def __init__(self, name_aws_secret_insta: str, aws_region: str, chrome_driver_path: str) -> None:
         # GET INSTA USERNAME AND PASSWORD FROM AWS SECRETS MANAGER
+        print("Getting username and login...")
         secrets_manager = boto3.session.Session().client(
                         service_name = "secretsmanager",
                         region_name = aws_region
@@ -26,6 +27,7 @@ class InstaBot:
         self.driver = webdriver.Chrome(executable_path=chrome_driver_path, options=op)
 
         # GET NUMBER OF FOLLOWERS AND FOLLOWING
+        print("Getting number of followers and following...")
         self.driver.get(f"https://www.instagram.com/{self.INSTA_USERNAME}/")
         time.sleep(5)
         num_followers = self.driver.find_elements(By.CSS_SELECTOR, "._ac2a")[1].text
@@ -46,6 +48,7 @@ class InstaBot:
     def get_followers_following(self) -> list[str]:
         """Go on Chrome, make login on account and web scrap the followers and following returning a list of each"""
         # LOGIN ON ACCOUNT
+        print("Login on account...")
         self.driver.get("https://www.instagram.com/")
         time.sleep(4)
         login = self.driver.find_element(By.XPATH, '//*[@id="loginForm"]/div/div[1]/div/label/input')
@@ -57,6 +60,7 @@ class InstaBot:
         time.sleep(5)
 
         # WEB SCRAPING FOLLOWERS
+        print("Getting followers list...")
         self.driver.get(f"https://www.instagram.com/{self.INSTA_USERNAME}/followers/") # go to page of followers
         time.sleep(5)
         follower_obj = self.driver.find_elements(By.CSS_SELECTOR, self.css_selector_followers) # get initial list of followers
@@ -78,6 +82,7 @@ class InstaBot:
             followers[i] = re.sub("\nVerified", "", followers[i]) # remove text of verified accounts
 
         # WEB SCRAPING FOLLOWING
+        print("Getting following list...")
         self.driver.get(f"https://www.instagram.com/{self.INSTA_USERNAME}/following/") # go to page of following
         time.sleep(5)
         following_obj = self.driver.find_elements(By.CSS_SELECTOR, self.css_selector_following) # get initial list of following
