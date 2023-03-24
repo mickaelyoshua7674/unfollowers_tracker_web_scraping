@@ -184,6 +184,20 @@ class InstaBot:
         except:
             print("Error getting list of not following back...\n")
             print_error()
+
+    def get_i_not_follow_back(self, followers: list[str], following: list[str]) -> list[str]:
+        """Return a list with all users tha you don't follow you back."""
+        print("Getting list of you not follow back...")
+        try:
+            you_not_follow_back = []
+            for f in followers:
+                if f not in following: # if the followers is not on following
+                    you_not_follow_back.append(f)
+            print("List of not following back generated.\n")
+            return sorted(you_not_follow_back)
+        except:
+            print("Error getting list of not following back...\n")
+            print_error()
     
     def get_unfollowers(self, followers: list[str], saved_followers: list[str]) -> list[str]:
         """Compare the saved followers with the new list of followers and return a list with those who are missing.

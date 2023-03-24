@@ -13,20 +13,15 @@ insta_bot = InstaBot(SECRET_INSTA, SECRET_TELEGRAM, AWS_REGION, CHROME_DRIVER_PA
 
 followers, following = insta_bot.get_followers_following()
 print(len(followers), len(following))
-saved_followers, _ = insta_bot.get_saved_followers_following(s3_resource)
-
-unfollowers = insta_bot.get_unfollowers(followers, saved_followers)
-unfollowers_str = ""
-if len(unfollowers) > 0:
-    for f in unfollowers:
-        if f != unfollowers[-1]:
-            unfollowers_str += "instagram.com/" + f + "/" + "\n"
-        else:
-            unfollowers_str += "instagram.com/" + f + "/"
-else:
-    unfollowers_str = "None"
-insta_bot.send_telegram_message("Unfollowers / deleted accounts / changed username:\n" + unfollowers_str)
-
 r = insta_bot.save_current_followers_following(s3_client, followers, following)
 print("Response to saving json file:")
 print(r)
+i_not_follow_back = insta_bot.get_i_not_follow_back(followers, following)
+
+i_not_follow_back_str = ""
+for f in i_not_follow_back:
+    if f != i_not_follow_back[-1]:
+        i_not_follow_back_str += "instagram.com/" + f + "/" + "\n"
+    else:
+        i_not_follow_back_str += "instagram.com/" + f + "/"
+insta_bot.send_telegram_message("You don't follow back:\n" + i_not_follow_back_str)
