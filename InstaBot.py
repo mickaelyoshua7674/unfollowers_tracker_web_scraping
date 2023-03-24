@@ -169,9 +169,9 @@ class InstaBot:
             print("    Load following list failed...\n")
             print_error()
 
-        return followers, following
+        return sorted(followers), sorted(following)
     
-    def get_not_follow_back(self, followers: list[str], following: list[str]):
+    def get_not_follow_back(self, followers: list[str], following: list[str]) -> list[str]:
         """Return a list with all users tha don't follow you back."""
         print("Getting list of not following back...")
         try:
@@ -180,9 +180,25 @@ class InstaBot:
                 if f not in followers: # if the following is not on followers
                     not_follow_back.append(f)
             print("List of not following back generated.\n")
-            return not_follow_back
+            return sorted(not_follow_back)
         except:
             print("Error getting list of not following back...\n")
+            print_error()
+    
+    def get_unfollowers(self, followers: list[str], saved_followers: list[str]) -> list[str]:
+        """Compare the saved followers with the new list of followers and return a list with those who are missing.
+        If list is empty, there is no change in followers."""
+        print("Verifying unfollowers...")
+        try:
+            unfollowers = []
+            if saved_followers != followers: # if the saved followers are not equal to the new followers
+                for f in saved_followers:
+                    if f not in followers: # if the elements in the saved list are not in the new list create a list with those missing elements
+                        unfollowers.append(f)
+            print("Unfollowers verifyed.\n")
+            return sorted(unfollowers)
+        except:
+            print("Error verifying unfollowers...\n")
             print_error()
     
     def save_current_followers_following(self, s3_client: boto3.client, followers: list[str], following: list[str]) -> dict:
@@ -194,8 +210,8 @@ class InstaBot:
         try:
             data = { # making dict format to store
                 "username": self.INSTA_USERNAME,
-                "followers": followers,
-                "following": following
+                "followers": sorted(followers),
+                "following": sorted(following)
             }
 
             response = s3_client.put_object(
@@ -223,7 +239,7 @@ class InstaBot:
             
             dict_data = json.loads(data.decode('utf-8')) # decoding
             print("Lists loaded.\n")
-            return dict_data["followers"], dict_data["following"]
+            return sorted(dict_data["followers"]), sorted(dict_data["following"])
         except:
             print("Error loading lists...\n")
             print_error()
@@ -237,3 +253,5 @@ class InstaBot:
         except:
             print("Error sending message...\n")
             print_error()
+
+    
