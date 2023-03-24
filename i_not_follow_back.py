@@ -25,3 +25,6 @@ for f in i_not_follow_back:
     else:
         i_not_follow_back_str += "instagram.com/" + f + "/"
 insta_bot.send_telegram_message("You don't follow back:\n" + i_not_follow_back_str)
+
+with open("i_dont_follow_back.txt", "w") as f:
+    f.write(i_not_follow_back_str)
