@@ -60,6 +60,22 @@ class InstaBot:
             print_error()
 
         # GET NUMBER OF FOLLOWERS AND FOLLOWING
+        print("   Entering the account...")
+        try:
+            driver.get("https://www.instagram.com/")
+            time.sleep(4)
+            login = driver.find_element(By.XPATH, '//*[@id="loginForm"]/div/div[1]/div/label/input')
+            login.send_keys(self.INSTA_USERNAME) # fill username
+            passw = driver.find_element(By.XPATH, '//*[@id="loginForm"]/div/div[2]/div/label/input')
+            passw.send_keys(self.INSTA_PASSWORD) # fill password
+            time.sleep(0.5)
+            passw.send_keys(Keys.ENTER) # press Enter
+            time.sleep(5)
+            print("    Login successfull.\n")
+        except:
+            print("    Login failed...\n")
+            print_error()
+            
         print("Getting number of followers and following...")
         try:
             driver.get(f"https://www.instagram.com/{self.INSTA_USERNAME}/")
