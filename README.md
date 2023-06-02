@@ -1,2 +1,3 @@
-# unfollowers_tracker_web_scraping
-Getting followers and following list with web scraping and comparing lists to return who don't follow back and stoped following
+# Insta WebScraping
+Get list of followers and following to track unfollowers, see who don't follow you back and who you don't follow back.
+Initial code completed, next step will be make more organized scripts and deploy using Docker.
